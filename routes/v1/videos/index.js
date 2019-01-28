@@ -12,51 +12,54 @@ module.exports = (db, logger) => {
   const CRYPTO = require('crypto');
   const VALIDATE = require('validate.js')
 
-
+  const Video = require('../../../classes/Video');
   /** Handlers */
   function uploadVideo(req, res, next) {
+    // validation rules
     const validationConstraints = {
-      file: { presence: { allowEmpty: false } },
+      video: { presence: { allowEmpty: false } },
+      thumb: { presence: { allowEmpty: false } },
       name: { presence: { allowEmpty: false } }
     }
 
+    // validation checking
     const errors = VALIDATE(req.body, validationConstraints)
+
     if (errors) return res.status(400).json(errors)
 
     const attributes = VALIDATE.cleanAttributes(req.body, validationConstraints)
+    const videoData = attributes.video.replace(/^data:([A-Za-z0-9-+/]+);base64,/, '');
+    const thumbData = attributes.thumb.replace(/^data:([A-Za-z0-9-+/]+);base64,/, '');
 
-    const base64Data = req.body.file.replace(/^data:([A-Za-z-+/]+);base64,/, '');
+    const videoObj = new Video;
 
-    FS.writeFile(`/Users/anilkonsal/code/personal/vt/api/public/uploads/${attributes.name}`, base64Data, 'base64', (err) => {
+    const params = {
+      video: videoData,
+      thumb: thumbData,
+      name: attributes.name,
+      userId: 1
+    }
 
-      if (err) {
-        return next({ status: 500, message: 'Something broke' })
-      }
-
-      return db.Video.create({
-        path: attributes.name,
-        user_id: 1,
-        name: attributes.name,
-      }).then(file => {
+    // save video
+    videoObj.save(params)
+      .then(file => {
         res.json(file)
-      })
-    })
-
+      }).catch(next)
 
   }
 
   function getVideos(req, res, next) {
-    db.Video.findAll({
-      where: { user_id: 1 },
-      order: [['id', 'desc']]
-    }).then(videos => {
-      res.json(videos)
-    })
+    Video.getAll()
+      .then(videos => {
+        res.json(videos)
+      }).catch(next)
   }
 
   function getVideo(req, res, next) {
-    logger.info('hello')
-    res.json({ 'msg': 'get video' })
+    Video.get(req.params.id)
+      .then(video => {
+        res.json(video)
+      }).catch(next)
   }
 
   return ROUTER

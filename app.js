@@ -19,14 +19,6 @@ app.use(express.static(__dirname + '/public'))
 app.use(cookieParser());
 const log = require('./utils/logger');
 
-app.use(function(req, res, next) {
-  var logger = log.loggerInstance.child({
-    id: req.id,
-    body: req.body
-  }, true)
-  logger.info({ req: req })
-  next();
-});
 
 
 let apiVersion = null
@@ -47,18 +39,27 @@ app.all('*', (req, res, next) => {
   next()
 })
 
+app.use(function (req, res, next) {
+  var logger = log.loggerInstance.child({
+    id: req.id,
+    body: req.body
+  }, true)
+  logger.info({ req: req })
+  next();
+});
+
 
 app.use('/', require('./routes')(db, logger));
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 
 // error handler
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   const err = new Error('Not Found')
   err.status = 404
   next(err)
@@ -83,7 +84,7 @@ if (app.get('env') !== 'production') {
     res.status(err.status || 500).json('Something broke on server')
   })
 } else {
-  app.use(function(err, req, res, next) {
+  app.use(function (err, req, res, next) {
     res.status(err.status || 500).json({
       message: err.message,
     })
