@@ -1,6 +1,6 @@
-const FS = require('fs')
+const FS = require('fs');
 const PATH = require('path');
-const db = require('../models')
+const db = require('../models');
 
 class Video {
   constructor() {
@@ -18,19 +18,19 @@ class Video {
     return new Promise((resolve, reject) => {
 
       if (!FS.existsSync(this.path)) {
-        reject('ERROR_PATH: Path does not exist')
+        reject('ERROR_PATH: Path does not exist');
       }
 
       FS.writeFile(PATH.resolve(this.path, name), video, 'base64', (err) => {
 
         if (err) {
-          reject(`ERROR_FWRITE: ${err}`)
+          reject(`ERROR_FWRITE: ${err}`);
         }
 
         FS.writeFile(PATH.resolve(this.path, `${name}.jpg`), thumb, 'base64', (err) => {
 
           if (err) {
-            reject(`ERROR_FWRITE: ${err}`)
+            reject(`ERROR_FWRITE: ${err}`);
           }
 
           return db.Video.create({
@@ -38,10 +38,10 @@ class Video {
             user_id: userId,
             name: name,
           }).then(video => {
-            resolve(video)
+            resolve(video);
           }).catch(e => {
-            reject(e)
-          })
+            reject(e);
+          });
         })
       })
     })
@@ -59,9 +59,9 @@ class Video {
         where: { user_id: 1 },
         order: [['id', 'desc']]
       }).then(videos => {
-        resolve(videos)
+        resolve(videos);
       }).catch(e => {
-        reject(e)
+        reject(e);
       })
     })
   }
@@ -75,15 +75,15 @@ class Video {
       db.Video.findByPk(id).then(video => {
 
         if (!video) {
-          reject('404 | Video not found')
+          reject('404 | Video not found');
         }
 
-        resolve(video)
+        resolve(video);
       }).catch(e => {
-        reject(e)
-      })
+        reject(e);
+      });
     })
   }
 }
 
-module.exports = Video
+module.exports = Video;

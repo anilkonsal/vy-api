@@ -1,18 +1,18 @@
-const ROUTER = require('express').Router()
-const FS = require('fs')
+const ROUTER = require('express').Router();
+const FS = require('fs');
 const PATH = require('path');
 
 module.exports = (db, logger) => {
   /** Routes */
-  ROUTER.post('/', uploadVideo)
-  ROUTER.get('/:id', getVideo)
-  ROUTER.get('/', getVideos)
+  ROUTER.post('/', uploadVideo);
+  ROUTER.get('/:id', getVideo);
+  ROUTER.get('/', getVideos);
 
   /** Additional packages */
-  const CRYPTO = require('crypto');
-  const VALIDATE = require('validate.js')
+  const VALIDATE = require('validate.js');
 
   const Video = require('../../../classes/Video');
+
   /** Handlers */
   function uploadVideo(req, res, next) {
     // validation rules
@@ -20,16 +20,18 @@ module.exports = (db, logger) => {
       video: { presence: { allowEmpty: false } },
       thumb: { presence: { allowEmpty: false } },
       name: { presence: { allowEmpty: false } }
-    }
+    };
 
     // validation checking
-    const errors = VALIDATE(req.body, validationConstraints)
+    const errors = VALIDATE(req.body, validationConstraints);
 
-    if (errors) return res.status(400).json(errors)
+    if (errors) return res.status(400).json(errors);
 
-    const attributes = VALIDATE.cleanAttributes(req.body, validationConstraints)
-    const videoData = attributes.video.replace(/^data:([A-Za-z0-9-+/]+);base64,/, '');
-    const thumbData = attributes.thumb.replace(/^data:([A-Za-z0-9-+/]+);base64,/, '');
+    const attributes = VALIDATE.cleanAttributes(req.body, validationConstraints);
+    const regex = /^data:([A-Za-z0-9-+/]+);base64,/;
+
+    const videoData = attributes.video.replace(regex, '');
+    const thumbData = attributes.thumb.replace(regex, '');
 
     const videoObj = new Video;
 
@@ -38,29 +40,29 @@ module.exports = (db, logger) => {
       thumb: thumbData,
       name: attributes.name,
       userId: 1
-    }
+    };
 
     // save video
     videoObj.save(params)
       .then(file => {
-        res.json(file)
-      }).catch(next)
+        res.json(file);
+      }).catch(next);
 
   }
 
   function getVideos(req, res, next) {
     Video.getAll()
       .then(videos => {
-        res.json(videos)
-      }).catch(next)
+        res.json(videos);
+      }).catch(next);
   }
 
   function getVideo(req, res, next) {
     Video.get(req.params.id)
       .then(video => {
-        res.json(video)
-      }).catch(next)
+        res.json(video);
+      }).catch(next);
   }
 
-  return ROUTER
+  return ROUTER;
 }
