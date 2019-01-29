@@ -18,22 +18,22 @@ class Video {
     return new Promise((resolve, reject) => {
 
       if (!FS.existsSync(this.path)) {
-        reject('ERROR_PATH:', 'Path does not exist')
+        reject('ERROR_PATH: Path does not exist')
       }
 
       FS.writeFile(PATH.resolve(this.path, name), video, 'base64', (err) => {
 
         if (err) {
-          reject('ERROR_FWRITE:', err)
+          reject(`ERROR_FWRITE: ${err}`)
         }
 
         FS.writeFile(PATH.resolve(this.path, `${name}.jpg`), thumb, 'base64', (err) => {
 
           if (err) {
-            reject('ERROR_FWRITE:', err)
+            reject(`ERROR_FWRITE: ${err}`)
           }
 
-          db.Video.create({
+          return db.Video.create({
             path: name,
             user_id: userId,
             name: name,

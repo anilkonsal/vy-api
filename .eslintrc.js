@@ -1,7 +1,6 @@
 module.exports = {
   'extends': 'airbnb-base',
-  'plugins': ['jest'
-  ],
+  'plugins': ['jest'],
   'env': {
     'jest/globals': true
   }
