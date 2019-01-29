@@ -17,6 +17,10 @@ class Video {
   save({ name, video, thumb, userId }) {
     return new Promise((resolve, reject) => {
 
+      if (!FS.existsSync(this.path)) {
+        reject('ERROR_PATH:', 'Path does not exist')
+      }
+
       FS.writeFile(PATH.resolve(this.path, name), video, 'base64', (err) => {
 
         if (err) {
@@ -33,8 +37,8 @@ class Video {
             path: name,
             user_id: userId,
             name: name,
-          }).then(file => {
-            resolve(file)
+          }).then(video => {
+            resolve(video)
           }).catch(e => {
             reject(e)
           })

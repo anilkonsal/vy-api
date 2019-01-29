@@ -7,17 +7,39 @@ const Video = require('../../classes/Video')
 
 describe('Video Class', () => {
   describe('save', () => {
+    let mockFsWriteFile;
+
     beforeAll(() => {
-      FS.writeFile = jest.fn()
+      FS.existsSync = jest.fn().mockReturnValue(true);
     })
+    beforeEach(() => {
+      mockFsWriteFile = jest.spyOn(FS, 'writeFile');
+    });
+    afterEach(() => {
+      mockFsWriteFile.mockReset();
+    });
+
 
     test('should resolve file when success', () => {
+      mockFsWriteFile.mockImplementation((p, d, callBack) => callBack());
+      const expected = [{ name: 'test', path: 'test', userId: 1 }]
+      db.Video.create = jest.fn().mockResolvedValue(expected)
+      const video = new Video();
+      const params = {
+        name: 'test',
+        video: 'test',
+        thumb: 'test',
+        userId: 1
+      };
+      video.save(params)
+        .then(video => {
+          expect(mockFsWriteFile).toHaveBeenCalledTimes(1)
 
+        }).catch(e => {
+          console.error(e)
+        })
     })
 
-    test('should reject when failure', () => {
-
-    })
 
   })
 
